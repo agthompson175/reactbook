@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "body": "this is the body of a post 1",
+        "user": {
+            "id": 4,
+            "firstName": "Derek",
+            "lastName": "Hawkins"
+        }
+    },
+    {
+        "id": 2,
+        "body": "this is the body of a post 2",
+        "user": {
+            "id": 3,
+            "firstName": "Adam",
+            "lastName": "Thompson"
+        }
+    },
+    {
+        "id": 3,
+        "body": "this is the BODY YODY YODY YODY of a post 3",
+        "user": {
+            "id": 1,
+            "firstName": "Dunkin",
+            "lastName": "Donuts"
+        }
+    },
+    {
+        "id": 4,
+        "body": "DO YOU HOW DO MR KRABBBBBSSSSSSS of a post 4",
+        "user": {
+            "id": 6,
+            "firstName": "Ben",
+            "lastName": "Affleck"
+        }
+    }
+]
