@@ -12,7 +12,9 @@ export const Cart = () => {
     const { currentUser } = useAuth();
     const { cart, getCart } = useContext(DataContext);
     const [newCart, setNewCart] = useState({});
-    
+    console.log(window.location.search)
+    const params = new URLSearchParams(window.location.search)
+    const clearCart = params.get('clear_cart')
     const handleUpdate = (infoObj) => {
         if (infoObj.id in newCart) {
             let newDict = { ...newCart };
@@ -25,6 +27,19 @@ export const Cart = () => {
             setNewCart({ ...newCart, ...newDict })
         }
     }
+    useEffect(() => {
+        console.log(clearCart)
+        if (clearCart=='1') {
+            db.collection('users').doc(currentUser.id).collection('cart').get()
+            .then((snapshot) => {
+                snapshot.forEach(doc => {
+                    doc.ref.delete()
+                })
+                getCart()
+            })
+        }
+    }, [clearCart])
+
     useEffect(() => {
         Object.keys(newCart).forEach(prod => {
             db.collection('users').doc(currentUser.id).collection('cart').doc(prod).update({
@@ -50,9 +65,10 @@ export const Cart = () => {
             .then(res => res.json())
             .then(checkout => {
                 console.log(checkout)
+                
                 stripe.redirectToCheckout({ sessionId: checkout.session_id })
             })
-            .then(db.collection('users').doc(currentUser.id).collection('cart').ref.delete())
+            //.then(db.collection('users').doc(currentUser.id).collection('cart').delete())
 
     };
 
