@@ -3,13 +3,16 @@ import { CartItem } from '../components/CartItem'
 import { useAuth } from '../contexts/AuthContext';
 import { DataContext } from '../contexts/DataProvider';
 import firebase from '../firebase';
+import { Link } from 'react-router-dom'
+import { loadStripe } from '@stripe/stripe-js'
 
 export const Cart = () => {
+    const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY)
     const db = firebase.firestore();
     const { currentUser } = useAuth();
     const { cart, getCart } = useContext(DataContext);
     const [newCart, setNewCart] = useState({});
-
+    
     const handleUpdate = (infoObj) => {
         if (infoObj.id in newCart) {
             let newDict = { ...newCart };
@@ -28,8 +31,30 @@ export const Cart = () => {
                 quantity: newCart[prod]
             }).catch(err => console.error(err))
         })
-        getCart()
-    }, [newCart, currentUser.id, db, getCart])
+        getCart();
+        // eslint-disable-next-line
+    }, [newCart, currentUser.id, db])
+
+
+    const handleCheckout = async (e) => {
+        e.preventDefault();
+
+        console.log(cart)
+        const stripe = await stripePromise
+        fetch('/api/shop/checkout', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cart)
+        })
+            .then(res => res.json())
+            .then(checkout => {
+                console.log(checkout)
+                stripe.redirectToCheckout({ sessionId: checkout.session_id })
+            })
+            .then(db.collection('users').doc(currentUser.id).collection('cart').ref.delete())
+
+    };
 
     return (
         <div>
@@ -40,7 +65,7 @@ export const Cart = () => {
                 <div className="card-header bg-dark text-light">
                     <i className="fa fa-shopping-cart" aria-hidden="true"></i>
                     Shopping Cart
-                    <a href="." className="btn btn-outline-info btn-sm pull-right">Continue Shopping</a>
+                    <Link to="/shop" className="btn btn-outline-info btn-sm pull-right">Continue Shopping</Link>
                     <div className="clearfix"></div>
                 </div>
                 <div className="card-body">
@@ -49,7 +74,6 @@ export const Cart = () => {
                     {Object.values(cart.items).map(productInfo => <CartItem handleUpdate={handleUpdate} key={productInfo.id} data={productInfo} />)}
                     {/* <!-- END PRODUCTS --> */}
 
-                    
                 </div>
                 <div className="card-footer">
                     {/* <!-- <div className="coupon col-md-5 col-sm-5 no-padding-left pull-left">
@@ -74,7 +98,7 @@ export const Cart = () => {
                         </div>
                     </div>
                     <div className="pull-right" style={{ margin: "10px" }}>
-                        <form id="checkout-form" action="" method="POST">
+                        <form id="checkout-form" onSubmit={handleCheckout} method="POST">
                             <input type="submit" className="btn btn-success pull-right" value="Checkout" />
                         </form>
                     </div>

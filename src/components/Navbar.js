@@ -5,7 +5,7 @@ import { DataContext } from '../contexts/DataProvider';
 
 export const Navbar = (props) => {
     const { currentUser, logout } = useAuth();
-    const { cart } = useContext(DataContext);
+    const { cart, setCart } = useContext(DataContext);
 
     const handleLogin = (e) => {
         e.preventDefault();
@@ -15,6 +15,7 @@ export const Navbar = (props) => {
 
     const handleLogout = (e) => {
         e.preventDefault();
+        setCart({ items: {}, quantity: 0, subtotal: 0, grandtotal: 0 });
         logout();
     }
 

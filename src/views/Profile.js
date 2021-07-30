@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, {  useEffect, useState } from 'react'
 import { PostList } from '../components/PostList';
 import { useAuth } from '../contexts/AuthContext';
+import firebase from 'firebase';
 
 export const Profile = () => {
     const [posts, setPosts] = useState([]);
     const { currentUser } = useAuth();
+    const db = firebase.firestore();
+    
 
     useEffect(() => {
         fetch('/api/blog/user')
@@ -12,18 +15,23 @@ export const Profile = () => {
             .then(data => setPosts(data))
     }, [])
 
-    const handleClick = (event) => {
-        event.preventDefault();
+    const handleClick = (e) => {
+        e.preventDefault();
 
         let formData = {
-            firstName: event.target.first_name.value,
-            lastName: event.target.last_name.value,
-            email: event.target.email.value,
-            bio: event.target.bio.value,
-            profileImage: event.target.profile_image.value,
+            name: e.currentUser.name.value,
+            email: e.currentUser.email.value,
+            bio: e.currentUser.bio.value,
+            profileImage: e.currentUser.profile_image.value,
         }
 
-        console.log(formData);
+        firebase.firestore().collection('users').doc(currentUser.id).set(formData)
+
+            .then((docRef) => {
+                console.log('profile updated.');
+            })
+            .catch(err => console.error(err))
+        console.log(formData)
     }
 
     return (
@@ -42,7 +50,7 @@ export const Profile = () => {
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="form-group">
-                                    <input type="text" className="form-control" placeholder={currentUser.name} name="first_name" defaultValue="" />
+                                    <input type="text" className="form-control" placeholder={currentUser.name} name="name" defaultValue="" />
                                 </div>
                             </div>
                             
@@ -64,7 +72,7 @@ export const Profile = () => {
                         <div className="row">
                             <div className="col-md-12">
                                 <div className="form-group">
-                                    <textarea className="form-control" name="bio" id="" cols="30" rows="10" placeholder='BIO: {currentUser.bio}'></textarea>
+                                    <textarea className="form-control" name="bio" id="" cols="30" rows="10" placeholder= {currentUser.bio}></textarea>
                                 </div>
                             </div>
                         </div>
